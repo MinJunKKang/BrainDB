@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils.memory_store import save_to_short_term, clean_expired_memory, search_and_update_count
+from utils.memory_store import save_to_short_term, clean_expired_memory, search_and_update_count, search_long_term_memory
 
 class MemoryGUI:
     def on_save(self):
@@ -22,11 +22,24 @@ class MemoryGUI:
         results = search_and_update_count(keyword)
         self.output_text.insert("end", f"[Search] '{keyword}' 검색 결과:\n")
 
-        if results:
-            for item in results:
-                self.output_text.insert("end", f"- {item['content']} (count: {item['count']})\n")
+        # 단기기억 검색
+        short_term_results = search_and_update_count(keyword)
+        if short_term_results:
+            for item in short_term_results:
+                self.output_text.insert(
+                    "end", f"- [Short-Term] {item['content']} (count: {item['count']})\n"
+                )
+        
         else:
-            self.output_text.insert("end", "검색 결과 없음.\n")
+        # 장기기억 검색 (단기에 없을 경우만)
+            long_term_results = search_long_term_memory(keyword)
+            if long_term_results:
+                for item in long_term_results:
+                    self.output_text.insert(
+                        "end", f"- [Long-Term] {item['content']} (emotion: {item.get('emotion', '분류안됨')})\n"
+                    )
+            else:
+                self.output_text.insert("end", "검색 결과 없음.\n")
 
         self.search_entry.delete(0, "end")
 

@@ -1,6 +1,7 @@
 import json
 import os
 import time
+from utils.emotion_selector import ask_emotion
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,11 +59,10 @@ def clean_expired_memory():
 
     return removed
 
-# 인출
+# 단기기억 인출
 def search_and_update_count(keyword: str):
     now = int(time.time())
     results = []
-    updated = False
 
     if not os.path.exists(SHORT_TERM_PATH):
         return results
@@ -73,7 +73,9 @@ def search_and_update_count(keyword: str):
         except json.JSONDecodeError:
             data = []
 
+    updated = False
     new_data = []
+
     for item in data:
         if item["expire_at"] > now:
             if keyword in item["content"]:
@@ -83,9 +85,11 @@ def search_and_update_count(keyword: str):
                 updated = True
 
                 if item["count"] >= 4:
-                    save_to_long_term(item)
-                    print(f"[Long-Term] 기억 전환됨: {item['content']}")
+                    emotion = ask_emotion() or "중간"
+                    save_to_long_term(item, emotion)
+                    print(f"[Long-Term] 기억 전환됨: {item['content']} ({emotion})")
                     continue
+
         new_data.append(item)
 
     if updated:
@@ -94,8 +98,10 @@ def search_and_update_count(keyword: str):
 
     return results
 
+# 장기기억 저장
+def save_to_long_term(item: dict, emotion: str = "중간"):
+    item["emotion"] = emotion  # 감정 필드 추가
 
-def save_to_long_term(item: dict):
     if os.path.exists(LONG_TERM_PATH):
         with open(LONG_TERM_PATH, "r", encoding="utf-8") as f:
             try:
@@ -109,3 +115,22 @@ def save_to_long_term(item: dict):
 
     with open(LONG_TERM_PATH, "w", encoding="utf-8") as f:
         json.dump(long_data, f, indent=4, ensure_ascii=False)
+
+# 장기기억 인출
+def search_long_term_memory(keyword: str):
+    results = []
+
+    if not os.path.exists(LONG_TERM_PATH):
+        return results
+
+    with open(LONG_TERM_PATH, "r", encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            data = []
+
+    for item in data:
+        if keyword in item["content"]:
+            results.append(item)
+
+    return results
