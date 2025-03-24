@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils.memory_store import save_to_short_term, clean_expired_memory
+from utils.memory_store import save_to_short_term, clean_expired_memory, search_and_update_count
 
 class MemoryGUI:
     def on_save(self):
@@ -12,6 +12,23 @@ class MemoryGUI:
         save_to_short_term(content)
         self.output_text.insert("end", f"[Saved] {content}\n")
         self.input_entry.delete(0, "end")
+
+    def on_search(self):
+        keyword = self.search_entry.get().strip()
+        if not keyword:
+            messagebox.showwarning("검색어를 입력해주세요.")
+            return
+
+        results = search_and_update_count(keyword)
+        self.output_text.insert("end", f"[Search] '{keyword}' 검색 결과:\n")
+
+        if results:
+            for item in results:
+                self.output_text.insert("end", f"- {item['content']} (count: {item['count']})\n")
+        else:
+            self.output_text.insert("end", "검색 결과 없음.\n")
+
+        self.search_entry.delete(0, "end")
 
     def on_clean_expired(self):
         removed = clean_expired_memory()
@@ -35,7 +52,7 @@ class MemoryGUI:
         self.search_frame.pack(fill="x", padx=10, pady=10)
         self.search_entry = ttk.Entry(self.search_frame, width=70)
         self.search_entry.pack(padx=10, pady=5)
-        self.search_button = ttk.Button(self.search_frame, text="Search")
+        self.search_button = ttk.Button(self.search_frame, text="Search", command=self.on_search)
         self.search_button.pack(pady=5)
 
         # TTL 정리 버튼
