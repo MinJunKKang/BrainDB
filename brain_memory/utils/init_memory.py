@@ -1,19 +1,21 @@
 import os
 import json
 
-folders = [
-    "data",
-    "gui",
-    "utils"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+FOLDERS = [
+    os.path.join(BASE_DIR, "data"),
+    os.path.join(BASE_DIR, "gui"),
+    os.path.join(BASE_DIR, "utils")
 ]
 
-short_term_file = "data/short_term.json"
-long_term_file = "data/long_term.json"
+SHORT_TERM_FILE = os.path.join(BASE_DIR, "data", "short_term.json")
+LONG_TERM_FILE = os.path.join(BASE_DIR, "data", "long_term.json")
 
 empty_memory = []
 
 def create_folders():
-    for folder in folders:
+    for folder in FOLDERS:
         os.makedirs(folder, exist_ok = True)
 
 def create_json_file(file_path):
@@ -26,8 +28,8 @@ def create_json_file(file_path):
 
 def init_project():
     create_folders()
-    create_json_file(short_term_file)
-    create_json_file(long_term_file)
+    create_json_file(SHORT_TERM_FILE)
+    create_json_file(LONG_TERM_FILE)
 
 if __name__ == "__main__":
     init_project()
