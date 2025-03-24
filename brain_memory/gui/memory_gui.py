@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils.memory_store import save_to_short_term
+from utils.memory_store import save_to_short_term, clean_expired_memory
 
 class MemoryGUI:
     def on_save(self):
@@ -12,6 +12,10 @@ class MemoryGUI:
         save_to_short_term(content)
         self.output_text.insert("end", f"[Saved] {content}\n")
         self.input_entry.delete(0, "end")
+
+    def on_clean_expired(self):
+        removed = clean_expired_memory()
+        self.output_text.insert("end", f"[Expired Removed] {removed} item(s) deleted\n")
 
     def __init__(self, root):
         self.root = root
@@ -33,6 +37,10 @@ class MemoryGUI:
         self.search_entry.pack(padx=10, pady=5)
         self.search_button = ttk.Button(self.search_frame, text="Search")
         self.search_button.pack(pady=5)
+
+        # TTL 정리 버튼
+        self.clean_button = ttk.Button(self.search_frame, text="Clean Expired", command=self.on_clean_expired)
+        self.clean_button.pack(pady=5)
 
         # 출력창 프레임
         self.output_frame = ttk.LabelFrame(root, text="Output")
