@@ -34,3 +34,23 @@ def save_to_short_term(content: str):
         json.dump(data, f, indent=4)
 
     print(f"Saved to short-term memory: {content}")
+
+def clean_expired_memory():
+    now = int(time.time())
+    removed = 0
+
+    if os.path.exists(SHORT_TERM_PATH):
+        with open(SHORT_TERM_PATH, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+
+        # 유효한 기억만 필터링
+        valid_data = [item for item in data if item["expire_at"] > now]
+        removed = len(data) - len(valid_data)
+
+        with open(SHORT_TERM_PATH, "w", encoding="utf-8") as f:
+            json.dump(valid_data, f, indent=4, ensure_ascii=False)
+
+    return removed
